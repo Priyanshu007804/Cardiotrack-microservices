@@ -27,13 +27,14 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, Long userId, String role) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(email)
+                .claim("userId", userId)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiry)
@@ -63,7 +64,7 @@ public class JwtService {
                     && claims.getExpiration().after(new Date());
 
         } catch (io.jsonwebtoken.JwtException
-                 | IllegalArgumentException ex) {
+                | IllegalArgumentException ex) {
             return false;
         }
     }
