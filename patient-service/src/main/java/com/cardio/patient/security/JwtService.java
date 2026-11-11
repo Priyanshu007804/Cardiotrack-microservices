@@ -54,7 +54,9 @@ public class JwtService {
         try {
             Claims claims = extractAllClaims(token);
 
-            return claims.getExpiration().after(new Date());
+            return claims.getSubject() != null
+                    && claims.getExpiration() != null
+                    && claims.getExpiration().after(new Date());
 
         } catch (io.jsonwebtoken.JwtException
                 | IllegalArgumentException ex) {

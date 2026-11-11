@@ -28,22 +28,25 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/actuator/health", "/error")
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/error")
                         .permitAll()
-
-                        // Admin-only deletion
-                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**")
-                        .hasRole("ADMIN")
 
                         // Patient's own profile
                         .requestMatchers("/api/patients/me/**")
                         .hasRole("PATIENT")
 
-                        // Hospital staff and doctors
+                        // Admin-only deletion
+                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**")
+                        .hasRole("ADMIN")
+
+                        // Admin, Staff and Doctor access
                         .requestMatchers("/api/patients/**")
                         .hasAnyRole("ADMIN", "STAFF", "DOCTOR")
 
