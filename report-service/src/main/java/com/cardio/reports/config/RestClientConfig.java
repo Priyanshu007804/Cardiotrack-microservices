@@ -1,8 +1,10 @@
 package com.cardio.reports.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -11,11 +13,23 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Configuration
 public class RestClientConfig {
 
-    @Value("${services.patient-service.url:http://localhost:8082}")
+    @Value("${services.patient-service.url:http://PATIENT-SERVICE}")
     private String patientServiceUrl;
 
-    @Value("${services.doctor-service.url:http://localhost:8083}")
+    @Value("${services.doctor-service.url:http://DOCTOR-SERVICE}")
     private String doctorServiceUrl;
+
+    @Bean
+    @Primary
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
+    }
+
+    @Bean
+    @LoadBalanced
+    public RestClient.Builder loadBalancedRestClientBuilder() {
+        return RestClient.builder();
+    }
 
     private void forwardAuthorizationHeader(org.springframework.http.HttpRequest request) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -28,8 +42,8 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient patientServiceRestClient() {
-        return RestClient.builder()
+    public RestClient patientServiceRestClient(@LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
+        return loadBalancedRestClientBuilder.clone()
                 .baseUrl(patientServiceUrl)
                 .requestInterceptor((request, body, execution) -> {
                     forwardAuthorizationHeader(request);
@@ -39,8 +53,8 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient doctorServiceRestClient() {
-        return RestClient.builder()
+    public RestClient doctorServiceRestClient(@LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
+        return loadBalancedRestClientBuilder.clone()
                 .baseUrl(doctorServiceUrl)
                 .requestInterceptor((request, body, execution) -> {
                     forwardAuthorizationHeader(request);

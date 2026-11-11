@@ -2,9 +2,12 @@ package com.cardio.patient.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.cardio.patient.dto.PatientRequestDTO;
@@ -18,10 +21,14 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/patients")
 public class PatientController {
 
-    private final PatientService patientService;
+    private static final Logger log = LoggerFactory.getLogger(PatientController.class);
 
-    public PatientController(PatientService patientService) {
+    private final PatientService patientService;
+    private final Environment environment;
+
+    public PatientController(PatientService patientService, Environment environment) {
         this.patientService = patientService;
+        this.environment = environment;
     }
 
     // Create patient (ADMIN, STAFF, DOCTOR)
@@ -47,6 +54,9 @@ public class PatientController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public PatientResponseDTO getPatientById(
             @PathVariable Long id) {
+
+        String port = environment.getProperty("local.server.port", environment.getProperty("server.port", "unknown"));
+        log.info(">>> [PATIENT-SERVICE INSTANCE PORT: {}] Executing GET /api/patients/{}", port, id);
 
         return patientService.getPatientById(id);
     }
@@ -88,6 +98,9 @@ public class PatientController {
     @PreAuthorize("hasRole('PATIENT')")
     public PatientResponseDTO getMyProfile(
             Authentication authentication) {
+
+        String port = environment.getProperty("local.server.port", environment.getProperty("server.port", "unknown"));
+        log.info(">>> [PATIENT-SERVICE INSTANCE PORT: {}] Executing GET /api/patients/me/profile", port);
 
         Long userId = (Long) authentication.getPrincipal();
 
