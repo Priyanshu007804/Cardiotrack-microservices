@@ -1,0 +1,70 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins: "*"
+                allowed-methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowed-headers: "*"
+
+          routes:
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/auth/**
+
+            - id: report-service-nested
+              uri: lb://REPORT-SERVICE
+              predicates:
+                - Path=/api/patients/*/medical-reports/**,/api/patients/*/medical-reports
+
+            - id: report-service-direct
+              uri: lb://REPORT-SERVICE
+              predicates:
+                - Path=/api/medical-reports/**
+
+            - id: hospital-service-nested
+              uri: lb://HOSPITAL-SERVICE
+              predicates:
+                - Path=/api/patients/*/hospital-stays/**,/api/patients/*/hospital-stays
+
+            - id: hospital-service-direct
+              uri: lb://HOSPITAL-SERVICE
+              predicates:
+                - Path=/api/hospital-stays/**
+
+            - id: doctor-service
+              uri: lb://DOCTOR-SERVICE
+              predicates:
+                - Path=/api/doctors/**,/api/doctor-assignments/**
+
+            - id: clinical-service
+              uri: lb://CLINICAL-SERVICE
+              predicates:
+                - Path=/api/medical-records/**,/api/medical-tests/**
+
+            - id: patient-service
+              uri: lb://PATIENT-SERVICE
+              predicates:
+                - Path=/api/patients/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true

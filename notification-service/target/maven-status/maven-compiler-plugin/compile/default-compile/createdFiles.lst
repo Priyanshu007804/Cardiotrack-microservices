@@ -1,0 +1,5 @@
+com\cardio\notification\consumer\PatientEventConsumer.class
+com\cardio\notification\event\PatientRegisteredEvent$PatientRegisteredEventBuilder.class
+com\cardio\notification\NotificationServiceApplication.class
+com\cardio\notification\config\KafkaConsumerConfig.class
+com\cardio\notification\event\PatientRegisteredEvent.class

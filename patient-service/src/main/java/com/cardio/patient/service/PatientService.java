@@ -1,13 +1,17 @@
 package com.cardio.patient.service;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cardio.patient.dto.PatientRequestDTO;
 import com.cardio.patient.dto.PatientResponseDTO;
 import com.cardio.patient.dto.PatientUpdateRequestDTO;
+import com.cardio.patient.event.PatientRegisteredEvent;
 import com.cardio.patient.exception.ResourceNotFoundException;
 import com.cardio.patient.model.Patient;
 import com.cardio.patient.repository.PatientRepository;
@@ -17,9 +21,13 @@ import com.cardio.patient.repository.PatientRepository;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(
+            PatientRepository patientRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.patientRepository = patientRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     // Entity to DTO mapping
@@ -42,6 +50,15 @@ public class PatientService {
         patient.setGender(request.getGender());
 
         Patient savedPatient = patientRepository.save(patient);
+
+        // Publish event for transaction-committed Kafka processing
+        PatientRegisteredEvent event = PatientRegisteredEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("PATIENT_REGISTERED")
+                .patientId(savedPatient.getId())
+                .timestamp(Instant.now())
+                .build();
+        eventPublisher.publishEvent(event);
 
         return toResponseDTO(savedPatient);
     }
@@ -120,6 +137,15 @@ public class PatientService {
         patient.setUserId(userId);
 
         Patient savedPatient = patientRepository.save(patient);
+
+        // Publish event for transaction-committed Kafka processing
+        PatientRegisteredEvent event = PatientRegisteredEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("PATIENT_REGISTERED")
+                .patientId(savedPatient.getId())
+                .timestamp(Instant.now())
+                .build();
+        eventPublisher.publishEvent(event);
 
         return toResponseDTO(savedPatient);
     }
