@@ -23,46 +23,49 @@ spring:
 
           routes:
             - id: auth-service
-              uri: lb://AUTH-SERVICE
+              uri: ${AUTH_SERVICE_URL:lb://AUTH-SERVICE}
               predicates:
                 - Path=/api/auth/**
 
             - id: report-service-nested
-              uri: lb://REPORT-SERVICE
+              uri: ${REPORT_SERVICE_URL:lb://REPORT-SERVICE}
               predicates:
                 - Path=/api/patients/*/medical-reports/**,/api/patients/*/medical-reports
 
             - id: report-service-direct
-              uri: lb://REPORT-SERVICE
+              uri: ${REPORT_SERVICE_URL:lb://REPORT-SERVICE}
               predicates:
                 - Path=/api/medical-reports/**
 
             - id: hospital-service-nested
-              uri: lb://HOSPITAL-SERVICE
+              uri: ${HOSPITAL_SERVICE_URL:lb://HOSPITAL-SERVICE}
               predicates:
                 - Path=/api/patients/*/hospital-stays/**,/api/patients/*/hospital-stays
 
             - id: hospital-service-direct
-              uri: lb://HOSPITAL-SERVICE
+              uri: ${HOSPITAL_SERVICE_URL:lb://HOSPITAL-SERVICE}
               predicates:
                 - Path=/api/hospital-stays/**
 
             - id: doctor-service
-              uri: lb://DOCTOR-SERVICE
+              uri: ${DOCTOR_SERVICE_URL:lb://DOCTOR-SERVICE}
               predicates:
                 - Path=/api/doctors/**,/api/doctor-assignments/**
 
             - id: clinical-service
-              uri: lb://CLINICAL-SERVICE
+              uri: ${CLINICAL_SERVICE_URL:lb://CLINICAL-SERVICE}
               predicates:
                 - Path=/api/medical-records/**,/api/medical-tests/**
 
             - id: patient-service
-              uri: lb://PATIENT-SERVICE
+              uri: ${PATIENT_SERVICE_URL:lb://PATIENT-SERVICE}
               predicates:
                 - Path=/api/patients/**
 
 eureka:
+  instance:
+    hostname: ${RENDER_EXTERNAL_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_PREFER_IP_ADDRESS:false}
   client:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
