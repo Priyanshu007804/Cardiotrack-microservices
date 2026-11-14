@@ -42,6 +42,16 @@ public class DoctorController {
         return doctorService.createDoctor(userId, request);
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DoctorResponseDTO createDoctorProfile(
+            @RequestParam Long userId,
+            @Valid @RequestBody DoctorRequestDTO request) {
+
+        return doctorService.createDoctor(userId, request);
+    }
+
     @GetMapping("/me/profile")
     @PreAuthorize("hasRole('DOCTOR')")
     public DoctorResponseDTO getMyProfile(

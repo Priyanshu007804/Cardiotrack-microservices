@@ -50,4 +50,27 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/admin/staff")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AuthResponseDTO> createStaffAccount(
+            @Valid @RequestBody RegisterRequestDTO requestDTO) {
+
+        AuthResponseDTO response =
+                userService.createStaffAccount(requestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/admin/patients")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AuthResponseDTO> createPatientAccount(
+            @Valid @RequestBody RegisterRequestDTO requestDTO) {
+
+        AuthResponseDTO response =
+                userService.createAccountWithRole(requestDTO,
+                        com.cardio.auth.model.Role.PATIENT);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }

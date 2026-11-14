@@ -113,6 +113,60 @@ public class UserService {
                 null);
     }
 
+    public AuthResponseDTO createStaffAccount(RegisterRequestDTO requestDTO) {
+
+        String email = requestDTO.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException(
+                    "Email is already registered.");
+        }
+
+        User user = new User();
+
+        user.setEmail(email);
+        user.setPassword(
+                passwordEncoder.encode(requestDTO.getPassword()));
+        user.setRole(Role.STAFF);
+        user.setEnabled(true);
+
+        User savedUser = userRepository.save(user);
+
+        return new AuthResponseDTO(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getRole().name(),
+                "Staff account created successfully",
+                null);
+    }
+
+    public AuthResponseDTO createAccountWithRole(RegisterRequestDTO requestDTO, Role role) {
+
+        String email = requestDTO.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException(
+                    "Email is already registered.");
+        }
+
+        User user = new User();
+
+        user.setEmail(email);
+        user.setPassword(
+                passwordEncoder.encode(requestDTO.getPassword()));
+        user.setRole(role);
+        user.setEnabled(true);
+
+        User savedUser = userRepository.save(user);
+
+        return new AuthResponseDTO(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getRole().name(),
+                role.name() + " account created successfully",
+                null);
+    }
+
     public User getUserByEmail(String email) {
 
         return userRepository.findByEmail(email.trim().toLowerCase())
