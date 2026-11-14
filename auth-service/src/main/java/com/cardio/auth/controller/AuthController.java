@@ -67,7 +67,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/patients")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<AuthResponseDTO> createPatientAccount(
             @Valid @RequestBody RegisterRequestDTO requestDTO) {
 

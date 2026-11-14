@@ -42,12 +42,19 @@ public class PatientService {
 
     // Create patient (Admin / Staff / Doctor)
     public PatientResponseDTO createPatient(PatientRequestDTO request) {
+        return createPatient(request, null);
+    }
+
+    public PatientResponseDTO createPatient(PatientRequestDTO request, Long userId) {
 
         Patient patient = new Patient();
 
         patient.setName(request.getName());
         patient.setAge(request.getAge());
         patient.setGender(request.getGender());
+        if (userId != null) {
+            patient.setUserId(userId);
+        }
 
         Patient savedPatient = patientRepository.save(patient);
 

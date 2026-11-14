@@ -36,9 +36,10 @@ public class PatientController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     @ResponseStatus(HttpStatus.CREATED)
     public PatientResponseDTO createPatient(
+            @RequestParam(required = false) Long userId,
             @Valid @RequestBody PatientRequestDTO request) {
 
-        return patientService.createPatient(request);
+        return patientService.createPatient(request, userId);
     }
 
     // Get all patients
