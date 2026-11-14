@@ -1,5 +1,6 @@
 package com.cardio.auth.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.cardio.auth.dto.AuthResponseDTO;
 import com.cardio.auth.dto.LoginRequestDTO;
 import com.cardio.auth.dto.RegisterRequestDTO;
+import com.cardio.auth.dto.UserSummaryDTO;
 import com.cardio.auth.model.Role;
 import com.cardio.auth.model.User;
 import com.cardio.auth.repository.UserRepository;
@@ -171,5 +173,26 @@ public class UserService {
 
         return userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
+    }
+
+    public List<UserSummaryDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(u -> new UserSummaryDTO(u.getId(), u.getEmail(), u.getRole().name(), u.isEnabled()))
+                .toList();
+    }
+
+    public AuthResponseDTO updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User with ID " + userId + " not found"));
+
+        user.setRole(newRole);
+        User savedUser = userRepository.save(user);
+
+        return new AuthResponseDTO(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getRole().name(),
+                "User role updated to " + newRole.name() + " successfully",
+                null);
     }
 }
