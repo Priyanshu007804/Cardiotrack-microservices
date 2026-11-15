@@ -42,8 +42,18 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient patientServiceRestClient(@LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
-        return loadBalancedRestClientBuilder.clone()
+    public RestClient patientServiceRestClient(
+            RestClient.Builder plainRestClientBuilder,
+            @LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
+
+        boolean isServiceId = patientServiceUrl != null && (
+                patientServiceUrl.startsWith("http://PATIENT-SERVICE")
+                || (!patientServiceUrl.contains(".") && !patientServiceUrl.contains("://"))
+        );
+
+        RestClient.Builder builderToUse = isServiceId ? loadBalancedRestClientBuilder : plainRestClientBuilder;
+
+        return builderToUse.clone()
                 .baseUrl(patientServiceUrl)
                 .requestInterceptor((request, body, execution) -> {
                     forwardAuthorizationHeader(request);
@@ -53,8 +63,18 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient doctorServiceRestClient(@LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
-        return loadBalancedRestClientBuilder.clone()
+    public RestClient doctorServiceRestClient(
+            RestClient.Builder plainRestClientBuilder,
+            @LoadBalanced RestClient.Builder loadBalancedRestClientBuilder) {
+
+        boolean isServiceId = doctorServiceUrl != null && (
+                doctorServiceUrl.startsWith("http://DOCTOR-SERVICE")
+                || (!doctorServiceUrl.contains(".") && !doctorServiceUrl.contains("://"))
+        );
+
+        RestClient.Builder builderToUse = isServiceId ? loadBalancedRestClientBuilder : plainRestClientBuilder;
+
+        return builderToUse.clone()
                 .baseUrl(doctorServiceUrl)
                 .requestInterceptor((request, body, execution) -> {
                     forwardAuthorizationHeader(request);
