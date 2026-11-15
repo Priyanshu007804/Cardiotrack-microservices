@@ -7,5 +7,6 @@ public record DoctorResponseDTO(
                 String qualification,
                 String specialization,
                 Integer experienceYears,
-                String registrationNumber) {
+                String registrationNumber,
+                String profilePicUrl) {
 }

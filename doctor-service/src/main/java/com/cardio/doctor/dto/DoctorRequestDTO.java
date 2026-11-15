@@ -14,7 +14,9 @@ public record DoctorRequestDTO(
 
                 @NotNull(message = "Experience years is required") @Min(value = 0, message = "Experience years cannot be negative") Integer experienceYears,
 
-                @NotBlank(message = "Registration number is required") String registrationNumber
+                @NotBlank(message = "Registration number is required") String registrationNumber,
+
+                String profilePicUrl
 
 ) {
 }

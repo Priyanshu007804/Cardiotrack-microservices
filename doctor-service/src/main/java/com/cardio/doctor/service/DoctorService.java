@@ -1,9 +1,11 @@
 package com.cardio.doctor.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cardio.doctor.dto.DoctorRequestDTO;
 import com.cardio.doctor.dto.DoctorResponseDTO;
@@ -14,6 +16,8 @@ import com.cardio.doctor.model.Doctor;
 import com.cardio.doctor.model.DoctorPatientAssignment;
 import com.cardio.doctor.repository.DoctorPatientAssignmentRepository;
 import com.cardio.doctor.repository.DoctorRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 @Service
 @Transactional
@@ -21,12 +25,15 @@ public class DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final DoctorPatientAssignmentRepository assignmentRepository;
+    private final Cloudinary cloudinary;
 
     public DoctorService(
             DoctorRepository doctorRepository,
-            DoctorPatientAssignmentRepository assignmentRepository) {
+            DoctorPatientAssignmentRepository assignmentRepository,
+            Cloudinary cloudinary) {
         this.doctorRepository = doctorRepository;
         this.assignmentRepository = assignmentRepository;
+        this.cloudinary = cloudinary;
     }
 
     private DoctorResponseDTO toResponseDTO(Doctor doctor) {
@@ -37,7 +44,8 @@ public class DoctorService {
                 doctor.getQualification(),
                 doctor.getSpecialization(),
                 doctor.getExperienceYears(),
-                doctor.getRegistrationNumber());
+                doctor.getRegistrationNumber(),
+                doctor.getProfilePicUrl());
     }
 
     public DoctorResponseDTO createDoctor(
@@ -61,6 +69,9 @@ public class DoctorService {
         doctor.setSpecialization(request.specialization());
         doctor.setExperienceYears(request.experienceYears());
         doctor.setRegistrationNumber(request.registrationNumber());
+        if (request.profilePicUrl() != null && !request.profilePicUrl().isBlank()) {
+            doctor.setProfilePicUrl(request.profilePicUrl().trim());
+        }
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
@@ -106,10 +117,59 @@ public class DoctorService {
         doctor.setQualification(request.qualification());
         doctor.setSpecialization(request.specialization());
         doctor.setExperienceYears(request.experienceYears());
+        if (request.profilePicUrl() != null) {
+            doctor.setProfilePicUrl(request.profilePicUrl().trim());
+        }
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
 
         return toResponseDTO(updatedDoctor);
+    }
+
+    public DoctorResponseDTO uploadProfilePicture(Long doctorId, MultipartFile file) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Doctor not found with id: " + doctorId));
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Image file cannot be empty");
+        }
+
+        try {
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "cardiotrack/doctors",
+                            "resource_type", "image"
+                    )
+            );
+
+            String secureUrl = (String) uploadResult.get("secure_url");
+            doctor.setProfilePicUrl(secureUrl);
+            Doctor savedDoctor = doctorRepository.save(doctor);
+            return toResponseDTO(savedDoctor);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload doctor profile photo to Cloudinary: " + e.getMessage(), e);
+        }
+    }
+
+    public String uploadPhotoOnly(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Image file cannot be empty");
+        }
+
+        try {
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "cardiotrack/doctors",
+                            "resource_type", "image"
+                    )
+            );
+            return (String) uploadResult.get("secure_url");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload doctor photo to Cloudinary: " + e.getMessage(), e);
+        }
     }
 
     public void deleteDoctor(Long id) {

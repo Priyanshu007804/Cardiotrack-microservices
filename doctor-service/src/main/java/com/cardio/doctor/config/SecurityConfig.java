@@ -40,6 +40,10 @@ public class SecurityConfig {
                                 "/error")
                         .permitAll()
 
+                        // Public doctor directory lookup
+                        .requestMatchers(HttpMethod.GET, "/api/doctors", "/api/doctors/*")
+                        .permitAll()
+
                         // Admin-only assignment creation and deletion
                         .requestMatchers(HttpMethod.POST, "/api/doctor-assignments/**")
                         .hasRole("ADMIN")

@@ -43,4 +43,7 @@ public class Doctor {
     @NotBlank(message = "Registration number is required")
     @Column(name = "registration_number", nullable = false, unique = true)
     private String registrationNumber;
+
+    @Column(name = "profile_pic_url", length = 1000)
+    private String profilePicUrl;
 }
