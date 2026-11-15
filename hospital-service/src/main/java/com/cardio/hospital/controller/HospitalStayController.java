@@ -57,6 +57,16 @@ public class HospitalStayController {
     }
 
     // ==========================================
+    // Get All Stays across all patients (ADMIN, STAFF, DOCTOR)
+    // ==========================================
+    @GetMapping("/api/hospital-stays")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
+    public List<HospitalStayResponseDTO> getAllStays(Authentication authentication) {
+        String callerRole = extractRole(authentication);
+        return hospitalStayService.getAllStays(callerRole);
+    }
+
+    // ==========================================
     // Get Stays by Patient ID (ADMIN, STAFF, DOCTOR, PATIENT)
     // ==========================================
     @GetMapping("/api/patients/{patientId}/hospital-stays")

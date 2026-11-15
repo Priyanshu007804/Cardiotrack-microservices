@@ -45,7 +45,7 @@ spring:
             - id: hospital-service-direct
               uri: ${HOSPITAL_SERVICE_URL:lb://HOSPITAL-SERVICE}
               predicates:
-                - Path=/api/hospital-stays/**,/api/hospital-care-logs/**
+                - Path=/api/hospital-stays/**,/api/hospital-stays,/api/hospital-care-logs/**
 
             - id: doctor-service
               uri: ${DOCTOR_SERVICE_URL:lb://DOCTOR-SERVICE}

@@ -114,6 +114,20 @@ public class HospitalStayService {
     }
 
     // ==========================================
+    // Get All Stays across all patients (ADMIN, STAFF, DOCTOR)
+    // ==========================================
+    @Transactional(readOnly = true)
+    public List<HospitalStayResponseDTO> getAllStays(String callerRole) {
+        if ("PATIENT".equalsIgnoreCase(callerRole)) {
+            throw new AccessDeniedException("Patients are not authorized to view all hospital stays");
+        }
+
+        return hospitalStayRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    // ==========================================
     // Get Stays by Patient ID
     // ==========================================
     @Transactional(readOnly = true)
